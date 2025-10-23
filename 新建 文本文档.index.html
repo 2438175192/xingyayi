@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>性压抑程度测试 | 专业心理健康评估工具</title>
+    <!-- Tailwind CSS v3 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- 统一的 Tailwind 配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#6366f1', // 主色调：柔和的蓝紫色
+                        secondary: '#8b5cf6', // 辅助色：紫色
+                        accent: '#a78bfa', // 强调色：浅紫色
+                        light: '#f3f4f6', // 浅色背景
+                        dark: '#4b5563', // 深色文本
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 0.5s ease-in-out',
+                        'slide-up': 'slideUp 0.5s ease-in-out',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(20px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            }
+            .bg-gradient-primary {
+                background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            }
+            .transition-all-300 {
+                transition: all 0.3s ease;
+            }
+        }
+        
+        /* 自定义样式 */
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            background-color: #f9fafb;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background-color: #6366f1;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .question-card {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        
+        .question-card.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .option-card {
+            transition: all 0.2s ease;
+        }
+        
+        .option-card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .option-card.selected {
+            border-color: #6366f1;
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+        
+        .result-card {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .resource-card {
+            transition: all 0.3s ease;
+        }
+        
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-md fixed w-full z-10">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-heart text-primary text-2xl"></i>
+                <span class="text-xl font-bold text-gray-800">性健康评估</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#home" class="text-gray-600 hover:text-primary transition-all-300">首页</a>
+                <a href="#about" class="text-gray-600 hover:text-primary transition-all-300">关于测试</a>
+                <a href="#test" class="text-gray-600 hover:text-primary transition-all-300">开始测试</a>
+                <a href="#resources" class="text-gray-600 hover:text-primary transition-all-300">资源中心</a>
+            </div>
+            <div class="md:hidden">
+                <button id="mobile-menu-btn" class="text-gray-600 hover:text-primary">
+                    <i class="fa fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white px-4 py-2 shadow-inner">
+            <a href="#home" class="block py-2 text-gray-600 hover:text-primary">首页</a>
+            <a href="#about" class="block py-2 text-gray-600 hover:text-primary">关于测试</a>
+            <a href="#test" class="block py-2 text-gray-600 hover:text-primary">开始测试</a>
+            <a href="#resources" class="block py-2 text-gray-600 hover:text-primary">资源中心</a>
+        </div>
+    </nav>
+
+    <!-- 首页/欢迎区域 -->
+    <section id="home" class="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-blue-50 to-purple-50">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-8 md:mb-0">
+                    <h1 class="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-800 mb-4">
+                        了解自己的<br><span class="text-primary">性心理健康</span>
+                    </h1>
+                    <p class="text-lg text-gray-600 mb-8">
+                        性压抑是许多成年人面临的常见问题，可能影响情绪、关系和整体幸福感。
+                        通过专业的评估工具，了解自己的状况，获取科学建议。
+                    </p>
+                    <div class="flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
+                        <a href="#test" class="bg-gradient-primary text-white py-3 px-6 rounded-lg font-bold shadow-lg hover:shadow-xl transition-all-300 text-center">
+                            开始测试
+                        </a>
+                        <a href="#about" class="border border-primary text-primary py-3 px-6 rounded-lg hover:bg-primary hover:text-white transition-all-300 text-center">
+                            了解更多
+                        </a>
+                    </div>
+                </div>
+                <div class="md:w-1/2">
+                    <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/rc/pc/super_tool/da74a2ff37374c97a6c0717c1deac925~tplv-a9rns2rl98-image.image?rcl=20251018173205C93B9F452143AD9C18B7&rk3s=8e244e95&rrcfp=f06b921b&x-expires=1763371951&x-signature=qntjLsR4dh2ppeAnVPNLSdmtKjI%3D" 
+                         alt="性健康与幸福感" 
+                         class="rounded-lg shadow-xl w-full h-auto">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 关于测试 -->
+    <section id="about" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-12">关于性压抑测试</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-blue-50 p-6 rounded-lg shadow-md">
+                    <div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-flask text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">科学依据</h3>
+                    <p class="text-gray-600">
+                        本测试基于双控制模型(Dual Control Model)和多项经过验证的心理学量表，
+                        包括性抑制/性兴奋量表(SIS/SES)、Mosher性内疚量表等，确保评估结果的科学性和可靠性。
+                    </p>
+                </div>
+                
+                <div class="bg-purple-50 p-6 rounded-lg shadow-md">
+                    <div class="w-14 h-14 bg-secondary rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-list-alt text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">测试内容</h3>
+                    <p class="text-gray-600">
+                        测试包含25个问题，涵盖性认知、性情绪、性行为和性社交四个维度，
+                        全面评估您的性压抑程度，并提供个性化的分析报告和改善建议。
+                    </p>
+                </div>
+                
+                <div class="bg-indigo-50 p-6 rounded-lg shadow-md">
+                    <div class="w-14 h-14 bg-accent rounded-full flex items-center justify-center mb-4">
+                        <i class="fa fa-lock text-white text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-800 mb-3">隐私保障</h3>
+                    <p class="text-gray-600">
+                        我们尊重您的隐私，所有测试数据仅在本地处理和存储，不会上传至服务器。
+                        您可以随时清除所有数据，确保个人信息安全。
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-12 bg-gray-50 p-6 rounded-lg shadow-md">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">性压抑的常见表现</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                            <i class="fa fa-exclamation-circle text-white text-sm"></i>
+                        </div>
+                        <p class="text-gray-600">情绪波动、焦虑、抑郁、烦躁等负面情绪</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                            <i class="fa fa-bed text-white text-sm"></i>
+                        </div>
+                        <p class="text-gray-600">睡眠障碍，如入睡困难、多梦、易醒</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                            <i class="fa fa-brain text-white text-sm"></i>
+                        </div>
+                        <p class="text-gray-600">注意力不集中、记忆力下降、工作学习效率降低</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                            <i class="fa fa-heartbeat text-white text-sm"></i>
+                        </div>
+                        <p class="text-gray-600">性功能障碍，如性欲减退、勃起功能障碍等</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                            <i class="fa fa-users text-white text-sm"></i>
+                        </div>
+                        <p class="text-gray-600">人际关系问题，尤其是亲密关系中的沟通障碍</p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                            <i class="fa fa-thought-bubble text-white text-sm"></i>
+                        </div>
+                        <p class="text-gray-600">频繁的性幻想或对性相关内容过度关注</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 测试区域 -->
+    <section id="test" class="py-16 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <h2 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-4">性压抑程度测试</h2>
+            <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+                本测试包含25个问题，预计需要5-8分钟完成。请根据您近3个月的真实感受和情况作答，
+                选择最符合您的选项。测试结果仅作参考，不构成医疗诊断。
+            </p>
+            
+            <!-- 测试开始前的说明 -->
+            <div id="test-intro" class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6 md:p-8">
+                <h3 class="text-xl font-semibold text-gray-800 mb-4">测试说明</h3>
+                <ul class="list-disc pl-5 mb-6 text-gray-600 space-y-2">
+                    <li>请在安静、不受干扰的环境中完成测试</li>
+                    <li>每个问题有5个选项，请选择最符合您情况的一项</li>
+                    <li>回答没有对错之分，请根据真实感受作答</li>
+                    <li>测试结果将在您完成所有问题后显示</li>
+                    <li>所有数据仅在本地处理，我们尊重您的隐私</li>
+                </ul>
+                <div class="text-center">
+                    <button id="start-test" class="bg-gradient-primary text-white py-3 px-8 rounded-lg shadow-md hover:shadow-lg transition-all-300">
+                        开始测试
+                    </button>
+                </div>
+            </div>
+            
+            <!-- 测试问题区域 -->
+            <div id="test-questions" class="max-w-3xl mx-auto bg-white rounded-lg shadow-lg p-6 md:p-8 hidden">
+                <!-- 进度条 -->
+                <div class="mb-6">
+                    <div class="flex justify-between text-sm text-gray-500 mb-1">
+                        <span>问题 <span id="current-question">1</span>/25</span>
+                        <span>完成度 <span id="progress-percentage">4%</span></span>
+                    </div>
+                    <div class="progress-bar">
+                        <div id="progress-bar-fill" class="progress-bar-fill" style="width: 4%;"></div>
+                    </div>
+                </div>
+                
+                <!-- 问题容器 -->
+                <div id="questions-container">
+                    <!-- 问题将通过JavaScript动态加载 -->
+                </div>
+                
+                <!-- 导航按钮 -->
+                <div class="flex justify-between mt-8">
+                    <button id="prev-question" class="border border-gray-300 text-gray-600 py-2 px-6 rounded-lg hover:bg-gray-50 transition-all-300 hidden">
+                        上一题
+                    </button>
+                    <div class="ml-auto">
+                        <button id="next-question" class="bg-primary text-white py-2 px-6 rounded-lg hover:bg-primary/90 transition-all-300">
+                            下一题
+                        </button>
+                        <button id="submit-test" class="bg-primary text-white py-2 px-6 rounded-lg hover:bg-primary/90 transition-all-300 hidden">
+                            提交测试
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 测试结果区域 -->
+            <div id="test-result" class="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-6 md:p-8 hidden">
+                <h3 class="text-2xl font-bold text-center text-gray-800 mb-6">测试结果</h3>
+                
+                <!-- 结果摘要 -->
+                <div class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-6 mb-8">
+                    <div class="flex flex-col md:flex-row items-center">
+                        <div class="md:w-1/3 mb-4 md:mb-0">
+                            <div class="relative w-40 h-40 mx-auto">
+                                <canvas id="result-chart"></canvas>
+                                <div class="absolute inset-0 flex items-center justify-center flex-col">
+                                    <span id="result-score" class="text-3xl font-bold text-primary">0</span>
+                                    <span class="text-sm text-gray-500">总分</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="md:w-2/3 md:pl-8">
+                            <h4 class="text-xl font-semibold text-gray-800 mb-2">
+                                <span id="result-level">中度性压抑</span>
+                            </h4>
+                            <p id="result-description" class="text-gray-600">
+                                您可能正经历中等程度的性压抑。这可能会对您的情绪、人际关系和生活质量产生一定影响。
+                                建议您关注自己的性心理健康，必要时寻求专业帮助。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 维度分析 -->
+                <h4 class="text-xl font-semibold text-gray-800 mb-4">维度分析</h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <h5 class="font-medium text-gray-800">性认知</h5>
+                            <span id="cognition-score" class="text-primary font-semibold">0/10</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="cognition-bar" class="progress-bar-fill" style="width: 0%; background-color: #6366f1;"></div>
+                        </div>
+                        <p id="cognition-description" class="mt-3 text-sm text-gray-600">
+                            您对性的认知较为开放，能够理性看待性相关话题。
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <h5 class="font-medium text-gray-800">性情绪</h5>
+                            <span id="emotion-score" class="text-secondary font-semibold">0/10</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="emotion-bar" class="progress-bar-fill" style="width: 0%; background-color: #8b5cf6;"></div>
+                        </div>
+                        <p id="emotion-description" class="mt-3 text-sm text-gray-600">
+                            您在性方面的情绪较为稳定，能够积极应对性相关的情感体验。
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <h5 class="font-medium text-gray-800">性行为</h5>
+                            <span id="behavior-score" class="text-accent font-semibold">0/10</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="behavior-bar" class="progress-bar-fill" style="width: 0%; background-color: #a78bfa;"></div>
+                        </div>
+                        <p id="behavior-description" class="mt-3 text-sm text-gray-600">
+                            您的性行为较为自然，能够健康地表达和满足自己的性需求。
+                        </p>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                        <div class="flex justify-between items-center mb-2">
+                            <h5 class="font-medium text-gray-800">性社交</h5>
+                            <span id="social-score" class="text-blue-500 font-semibold">0/10</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="social-bar" class="progress-bar-fill" style="width: 0%; background-color: #3b82f6;"></div>
+                        </div>
+                        <p id="social-description" class="mt-3 text-sm text-gray-600">
+                            您在性社交方面较为开放，能够与伴侣有效沟通性需求和偏好。
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- 建议与资源 -->
+                <h4 class="text-xl font-semibold text-gray-800 mb-4">个性化建议</h4>
+                <div id="suggestions" class="bg-white border border-gray-200 rounded-lg p-6 shadow-sm mb-8">
+                    <!-- 建议内容将通过JavaScript动态加载 -->
+                </div>
+                
+                <!-- 操作按钮 -->
+                <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-4">
+                    <button id="save-result" class="border border-primary text-primary py-2 px-6 rounded-lg hover:bg-primary hover:text-white transition-all-300">
+                        <i class="fa fa-download mr-2"></i>保存结果
+                    </button>
+                    <button id="share-result" class="border border-primary text-primary py-2 px-6 rounded-lg hover:bg-primary hover:text-white transition-all-300">
+                        <i class="fa fa-share-alt mr-2"></i>分享
+                    </button>
+                    <button id="restart-test" class="bg-primary text-white py-2 px-6 rounded-lg hover:bg-primary/90 transition-all-300">
+                        <i class="fa fa-refresh mr-2"></i>重新测试
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 资源中心 -->
+    <section id="resources" class="py-16 bg-white">
+        <div class="container mx-auto px-4">
+            <h2 class="text-2xl md:text-3xl font-bold text-center text-gray-800 mb-4">性健康资源中心</h2>
+            <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+                我们收集了一些专业的性健康资源，帮助您更好地了解和改善自己的性心理健康。
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- 资源卡片 1 -->
+                <div class="resource-card bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md">
+                    <div class="h-48 bg-gradient-to-r from-primary to-secondary flex items-center justify-center">
+                        <i class="fa fa-book text-white text-5xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">推荐书籍</h3>
+                        <ul class="text-gray-600 space-y-2 mb-4">
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                                <span>《性心理学》- 霭理士</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                                <span>《亲密关系》- 罗兰·米勒</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-primary mt-1 mr-2"></i>
+                                <span>《海蒂性学报告》- 雪儿·海蒂</span>
+                            </li>
+                        </ul>
+                        <a href="#" class="text-primary hover:underline flex items-center">
+                            查看更多 <i class="fa fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 资源卡片 2 -->
+                <div class="resource-card bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md">
+                    <div class="h-48 bg-gradient-to-r from-secondary to-accent flex items-center justify-center">
+                        <i class="fa fa-video-camera text-white text-5xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">在线课程</h3>
+                        <ul class="text-gray-600 space-y-2 mb-4">
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-secondary mt-1 mr-2"></i>
+                                <span>性健康与亲密关系</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-secondary mt-1 mr-2"></i>
+                                <span>克服性焦虑与压抑</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-secondary mt-1 mr-2"></i>
+                                <span>改善伴侣沟通技巧</span>
+                            </li>
+                        </ul>
+                        <a href="#" class="text-secondary hover:underline flex items-center">
+                            查看更多 <i class="fa fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- 资源卡片 3 -->
+                <div class="resource-card bg-white border border-gray-200 rounded-lg overflow-hidden shadow-md">
+                    <div class="h-48 bg-gradient-to-r from-accent to-blue-500 flex items-center justify-center">
+                        <i class="fa fa-users text-white text-5xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-semibold text-gray-800 mb-2">专业咨询</h3>
+                        <ul class="text-gray-600 space-y-2 mb-4">
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-accent mt-1 mr-2"></i>
+                                <span>性心理咨询师名录</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-accent mt-1 mr-2"></i>
+                                <span>在线心理咨询平台</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-accent mt-1 mr-2"></i>
+                                <span>性健康诊所指南</span>
+                            </li>
+                        </ul>
+                        <a href="#" class="text-accent hover:underline flex items-center">
+                            查看更多 <i class="fa fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 页脚 -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">关于我们</h3>
+                    <p class="text-gray-400">
+                        我们致力于提供专业、科学的性健康评估工具和资源，
+                        帮助人们更好地了解自己的性心理健康，提升生活质量。
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">快速链接</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#home" class="text-gray-400 hover:text-white transition-all-300">首页</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white transition-all-300">关于测试</a></li>
+                        <li><a href="#test" class="text-gray-400 hover:text-white transition-all-300">开始测试</a></li>
+                        <li><a href="#resources" class="text-gray-400 hover:text-white transition-all-300">资源中心</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-semibold mb-4">联系我们</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-center">
+                            <i class="fa fa-envelope mr-2 text-gray-400"></i>
+                            <a href="mailto:contact@sexualhealth.com" class="text-gray-400 hover:text-white transition-all-300">contact@sexualhealth.com</a>
+                        </li>
+                        <li class="flex items-center">
+                            <i class="fa fa-phone mr-2 text-gray-400"></i>
+                            <span class="text-gray-400">400-123-4567</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm mb-4 md:mb-0">
+                    &copy; 2025 性健康评估. 保留所有权利.
+                </p>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-400 hover:text-white transition-all-300">
+                        <i class="fa fa-weixin text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-all-300">
+                        <i class="fa fa-weibo text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-white transition-all-300">
+                        <i class="fa fa-qq text-xl"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 隐私政策弹窗 -->
+    <div id="privacy-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4 p-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-gray-800">隐私政策</h3>
+                <button id="close-privacy" class="text-gray-500 hover:text-gray-700">
+                    <i class="fa fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="text-gray-600 space-y-4 max-h-96 overflow-y-auto">
+                <p>
+                    我们尊重您的隐私，并致力于保护您的个人信息。本隐私政策旨在说明我们如何处理您在使用本网站时提供的信息。
+                </p>
+                <p>
+                    <strong>数据收集与使用</strong><br>
+                    本网站的性压抑测试工具不会收集或存储您的个人身份信息。所有测试数据仅在您的本地设备上处理和存储，不会上传至我们的服务器或任何第三方服务。
+                </p>
+                <p>
+                    <strong>本地存储</strong><br>
+                    测试结果可能会存储在您的浏览器的本地存储中，以便您可以查看历史记录。您可以随时清除这些数据。
+                </p>
+                <p>
+                    <strong>第三方服务</strong><br>
+                    本网站可能使用第三方分析工具（如Google Analytics）来收集有关网站使用情况的匿名数据，这些数据不包含个人身份信息。
+                </p>
+                <p>
+                    <strong>隐私保护</strong><br>
+                    我们采取适当的安全措施保护您的信息免受未授权访问、使用或泄露。
+                </p>
+                <p>
+                    <strong>政策更新</strong><br>
+                    我们可能会不时更新本隐私政策。如有重大变更，我们将在网站上发布通知。
+                </p>
+            </div>
+            <div class="mt-6 flex justify-end">
+                <button id="accept-privacy" class="bg-primary text-white py-2 px-6 rounded-lg hover:bg-primary/90 transition-all-300">
+                    我已阅读并同意
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 测试问题数据
+        const questions = [
+            {
+                id: 1,
+                dimension: "cognition",
+                text: "我认为性是自然且健康的一部分。",
+                options: [
+                    { value: 5, text: "非常同意" },
+                    { value: 4, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 2, text: "不同意" },
+                    { value: 1, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 2,
+                dimension: "emotion",
+                text: "当想到性时，我通常感到焦虑或不安。",
+                options: [
+                    { value: 1, text: "非常同意" },
+                    { value: 2, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 4, text: "不同意" },
+                    { value: 5, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 3,
+                dimension: "behavior",
+                text: "我能够自然地表达自己的性欲望和需求。",
+                options: [
+                    { value: 5, text: "非常同意" },
+                    { value: 4, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 2, text: "不同意" },
+                    { value: 1, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 4,
+                dimension: "social",
+                text: "我很难与伴侣讨论性相关的话题。",
+                options: [
+                    { value: 1, text: "非常同意" },
+                    { value: 2, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 4, text: "不同意" },
+                    { value: 5, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 5,
+                dimension: "cognition",
+                text: "我认为性幻想是不道德或不健康的。",
+                options: [
+                    { value: 1, text: "非常同意" },
+                    { value: 2, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 4, text: "不同意" },
+                    { value: 5, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 6,
+                dimension: "emotion",
+                text: "性活动后，我常常感到内疚或羞耻。",
+                options: [
+                    { value: 1, text: "非常同意" },
+                    { value: 2, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 4, text: "不同意" },
+                    { value: 5, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 7,
+                dimension: "behavior",
+                text: "我对自己的性生活感到满意。",
+                options: [
+                    { value: 5, text: "非常同意" },
+                    { value: 4, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 2, text: "不同意" },
+                    { value: 1, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 8,
+                dimension: "social",
+                text: "我能够与伴侣共同探索和尝试新的性体验。",
+                options: [
+                    { value: 5, text: "非常同意" },
+                    { value: 4, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 2, text: "不同意" },
+                    { value: 1, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 9,
+                dimension: "cognition",
+                text: "我认为谈论性是尴尬或不适宜的。",
+                options: [
+                    { value: 1, text: "非常同意" },
+                    { value: 2, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 4, text: "不同意" },
+                    { value: 5, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 10,
+                dimension: "emotion",
+                text: "当面对性刺激时，我能够放松并享受。",
+                options: [
+                    { value: 5, text: "非常同意" },
+                    { value: 4, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 2, text: "不同意" },
+                    { value: 1, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 11,
+                dimension: "behavior",
+                text: "我常常压抑自己的性冲动。",
+                options: [
+                    { value: 1, text: "非常同意" },
+                    { value: 2, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 4, text: "不同意" },
+                    { value: 5, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 12,
+                dimension: "social",
+                text: "我担心伴侣对我的性表现不满意。",
+                options: [
+                    { value: 1, text: "非常同意" },
+                    { value: 2, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 4, text: "不同意" },
+                    { value: 5, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 13,
+                dimension: "cognition",
+                text: "我对性知识有充分的了解。",
+                options: [
+                    { value: 5, text: "非常同意" },
+                    { value: 4, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 2, text: "不同意" },
+                    { value: 1, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 14,
+                dimension: "emotion",
+                text: "性对我来说是一种压力而非享受。",
+                options: [
+                    { value: 1, text: "非常同意" },
+                    { value: 2, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 4, text: "不同意" },
+                    { value: 5, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 15,
+                dimension: "behavior",
+                text: "我能够通过健康的方式满足自己的性需求。",
+                options: [
+                    { value: 5, text: "非常同意" },
+                    { value: 4, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 2, text: "不同意" },
+                    { value: 1, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 16,
+                dimension: "social",
+                text: "我与伴侣在性方面有良好的沟通。",
+                options: [
+                    { value: 5, text: "非常同意" },
+                    { value: 4, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 2, text: "不同意" },
+                    { value: 1, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 17,
+                dimension: "cognition",
+                text: "我认为性是亲密关系中重要的一部分。",
+                options: [
+                    { value: 5, text: "非常同意" },
+                    { value: 4, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 2, text: "不同意" },
+                    { value: 1, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 18,
+                dimension: "emotion",
+                text: "我对自己的身体和性吸引力感到满意。",
+                options: [
+                    { value: 5, text: "非常同意" },
+                    { value: 4, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 2, text: "不同意" },
+                    { value: 1, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 19,
+                dimension: "behavior",
+                text: "我因为担心被评判而避免某些性活动。",
+                options: [
+                    { value: 1, text: "非常同意" },
+                    { value: 2, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 4, text: "不同意" },
+                    { value: 5, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 20,
+                dimension: "social",
+                text: "我能够在性方面设定健康的边界。",
+                options: [
+                    { value: 5, text: "非常同意" },
+                    { value: 4, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 2, text: "不同意" },
+                    { value: 1, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 21,
+                dimension: "cognition",
+                text: "我对性的态度受到传统观念的严重影响。",
+                options: [
+                    { value: 1, text: "非常同意" },
+                    { value: 2, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 4, text: "不同意" },
+                    { value: 5, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 22,
+                dimension: "emotion",
+                text: "我在性方面感到自信和舒适。",
+                options: [
+                    { value: 5, text: "非常同意" },
+                    { value: 4, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 2, text: "不同意" },
+                    { value: 1, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 23,
+                dimension: "behavior",
+                text: "我能够平衡自己的性需求与日常生活。",
+                options: [
+                    { value: 5, text: "非常同意" },
+                    { value: 4, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 2, text: "不同意" },
+                    { value: 1, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 24,
+                dimension: "social",
+                text: "我担心自己的性取向或偏好不被接受。",
+                options: [
+                    { value: 1, text: "非常同意" },
+                    { value: 2, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 4, text: "不同意" },
+                    { value: 5, text: "非常不同意" }
+                ]
+            },
+            {
+                id: 25,
+                dimension: "cognition",
+                text: "我认为性健康是整体健康的重要组成部分。",
+                options: [
+                    { value: 5, text: "非常同意" },
+                    { value: 4, text: "同意" },
+                    { value: 3, text: "中立" },
+                    { value: 2, text: "不同意" },
+                    { value: 1, text: "非常不同意" }
+                ]
+            }
+        ];
+
+        // 结果解释和建议
+        const resultInterpretations = [
+            {
+                range: [25, 50],
+                level: "重度性压抑",
+                description: "您可能正经历严重的性压抑。这可能会对您的情绪、人际关系和整体生活质量产生显著负面影响。建议您寻求专业心理咨询师或性治疗师的帮助。",
+                suggestions: [
+                    "寻求专业帮助：建议咨询专业的心理咨询师或性治疗师，他们可以帮助您探索性压抑的根源并提供有效的应对策略。",
+                    "性教育学习：通过阅读专业书籍和参加性教育课程，增加对性健康的了解，纠正可能存在的认知偏差。",
+                    "自我探索：在安全、私密的环境中，尝试了解自己的身体和性反应，建立积极的身体意象。",
+                    "放松技巧：学习并练习放松技巧，如深呼吸、冥想等，帮助减轻性相关的焦虑和紧张。"
+                ]
+            },
+            {
+                range: [51, 75],
+                level: "中度性压抑",
+                description: "您可能正经历中等程度的性压抑。这可能会对您的情绪、人际关系和生活质量产生一定影响。建议您关注自己的性心理健康，必要时寻求专业帮助。",
+                suggestions: [
+                    "自我反思：尝试理解性压抑的可能原因，是源于过去的经历、文化观念还是其他因素。",
+                    "沟通练习：如果有伴侣，尝试与伴侣坦诚地沟通性需求和担忧，共同探索改善性生活的方法。",
+                    "阅读与学习：阅读有关性健康和性心理学的书籍，扩展性知识，改善性认知。",
+                    "尝试新体验：在舒适和自愿的前提下，尝试新的性体验或性幻想，逐步打破性压抑的限制。"
+                ]
+            },
+            {
+                range: [76, 100],
+                level: "轻度性压抑",
+                description: "您可能有轻微的性压抑倾向。这在现代社会中较为常见，通常不会对生活造成严重影响，但仍有改善空间。",
+                suggestions: [
+                    "关注自我感受：多关注自己的身体和性感受，尝试识别并接纳自己的性需求。",
+                    "改善生活方式：规律作息、适当运动和健康饮食有助于改善情绪和性健康。",
+                    "增强亲密关系：与伴侣加强情感连接，增加亲密互动，改善性关系质量。",
+                    "探索性偏好：在安全和自愿的前提下，探索自己的性偏好和兴趣，丰富性生活。"
+                ]
+            },
+            {
+                range: [101, 125],
+                level: "性心理较为健康",
+                description: "您的性心理状态较为健康。您对性有积极的认知和态度，能够健康地表达和满足自己的性需求。",
+                suggestions: [
+                    "持续学习：性健康是一个持续学习和成长的过程，保持对性知识的开放态度。",
+                    "维护关系：与伴侣保持良好的沟通和亲密关系，共同探索和成长。",
+                    "关注变化：留意生活中可能影响性健康的因素，如压力、健康状况等，及时调整。",
+                    "分享经验：如果合适，可以与他人分享您的积极经验，帮助更多人建立健康的性观念。"
+                ]
+            }
+        ];
+
+        // 维度解释
+        const dimensionInterpretations = {
+            cognition: [
+                "您对性的认知较为保守，可能存在较多的性负面观念和误解。建议通过专业书籍、课程或咨询，增加对性健康的科学了解，建立积极的性认知。",
+                "您对性的认知有一定的局限性，可能受到传统观念或文化背景的影响。建议保持开放的学习态度，接触更多科学的性知识，拓宽性认知的视野。",
+                "您对性的认知处于中等水平，有积极的方面也有需要改善的地方。建议继续学习和探索，进一步建立科学、健康的性观念。",
+                "您对性的认知较为开放和健康，能够理性看待性相关话题。建议继续保持这种积极的态度，并将知识应用到实际生活中。",
+                "您对性的认知非常健康和开放，拥有科学、积极的性观念。这有助于您建立健康的性关系，享受满意的性生活。"
+            ],
+            emotion: [
+                "您在性方面可能经常感到焦虑、内疚或羞耻等负面情绪。建议寻求专业帮助，探索这些情绪的根源，并学习有效的情绪管理技巧。",
+                "您在性方面可能有一定程度的负面情绪体验。建议尝试放松技巧，如深呼吸、冥想等，减轻性相关的焦虑和紧张。",
+                "您在性方面的情绪体验处于中等水平，有积极的感受也有负面的感受。建议关注自己的情绪反应，学习接纳和调节性相关的情绪。",
+                "您在性方面的情绪较为稳定，能够积极应对性相关的情感体验。建议继续保持这种积极的情绪状态，并与伴侣分享您的感受。",
+                "您在性方面的情绪非常健康和积极，能够充分享受性带来的愉悦和亲密。这有助于您建立满足的性关系，提升整体幸福感。"
+            ],
+            behavior: [
+                "您可能在性行为方面存在较多的压抑和限制。建议在安全、私密的环境中，逐步探索自己的身体和性反应，建立积极的性行为模式。",
+                "您在性行为方面可能有一定程度的压抑。建议尝试在舒适和自愿的前提下，逐步打破性压抑的限制，尝试新的性体验。",
+                "您的性行为模式处于中等水平，有健康的方面也有需要改善的地方。建议关注自己的性需求，学习以健康、积极的方式表达和满足这些需求。",
+                "您的性行为较为自然和健康，能够较好地表达和满足自己的性需求。建议继续保持这种积极的行为模式，并与伴侣共同探索和成长。",
+                "您的性行为非常健康和自然，能够充分享受性带来的愉悦和亲密。这有助于您建立满足的性关系，提升整体生活质量。"
+            ],
+            social: [
+                "您在性社交方面可能存在较多的困难和障碍。建议寻求专业帮助，学习有效的沟通技巧，逐步改善与伴侣在性方面的互动。",
+                "您在性社交方面可能有一定程度的困难。建议尝试与伴侣进行坦诚的沟通，分享彼此的性需求和担忧，共同探索改善性关系的方法。",
+                "您在性社交方面的能力处于中等水平，有成功的经验也有需要改善的地方。建议继续提升沟通技巧，增强与伴侣在性方面的亲密感和理解。",
+                "您在性社交方面的能力较为良好，能够与伴侣进行有效的性沟通。建议继续保持这种积极的互动模式，并不断提升关系的质量。",
+                "您在性社交方面的能力非常出色，能够与伴侣建立深度的性亲密和理解。这有助于您维持健康、满足的性关系，提升整体幸福感。"
+            ]
+        };
+
+        // DOM元素
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        const testIntro = document.getElementById('test-intro');
+        const testQuestions = document.getElementById('test-questions');
+        const testResult = document.getElementById('test-result');
+        const startTestBtn = document.getElementById('start-test');
+        const questionsContainer = document.getElementById('questions-container');
+        const currentQuestionEl = document.getElementById('current-question');
+        const progressPercentageEl = document.getElementById('progress-percentage');
+        const progressBarFill = document.getElementById('progress-bar-fill');
+        const prevQuestionBtn = document.getElementById('prev-question');
+        const nextQuestionBtn = document.getElementById('next-question');
+        const submitTestBtn = document.getElementById('submit-test');
+        const privacyModal = document.getElementById('privacy-modal');
+        const closePrivacyBtn = document.getElementById('close-privacy');
+        const acceptPrivacyBtn = document.getElementById('accept-privacy');
+        const saveResultBtn = document.getElementById('save-result');
+        const shareResultBtn = document.getElementById('share-result');
+        const restartTestBtn = document.getElementById('restart-test');
+
+        // 测试状态
+        let currentQuestion = 0;
+        const answers = {};
+
+        // 移动端菜单切换
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 70,
+                        behavior: 'smooth'
+                    });
+                    
+                    // 如果是移动端，点击后关闭菜单
+                    if (!mobileMenu.classList.contains('hidden')) {
+                        mobileMenu.classList.add('hidden');
+                    }
+                }
+            });
+        });
+
+        // 显示隐私政策弹窗
+        function showPrivacyModal() {
+            const hasAcceptedPrivacy = localStorage.getItem('hasAcceptedPrivacy');
+            if (!hasAcceptedPrivacy) {
+                privacyModal.classList.remove('hidden');
+            }
+        }
+
+        // 关闭隐私政策弹窗
+        closePrivacyBtn.addEventListener('click', () => {
+            privacyModal.classList.add('hidden');
+        });
+
+        // 接受隐私政策
+        acceptPrivacyBtn.addEventListener('click', () => {
+            localStorage.setItem('hasAcceptedPrivacy', 'true');
+            privacyModal.classList.add('hidden');
+        });
+
+        // 加载问题
+        function loadQuestion(index) {
+            const question = questions[index];
+            currentQuestionEl.textContent = index + 1;
+            
+            // 更新进度条
+            const progress = ((index + 1) / questions.length) * 100;
+            progressPercentageEl.textContent = `${Math.round(progress)}%`;
+            progressBarFill.style.width = `${progress}%`;
+            
+            // 创建问题卡片
+            const questionCard = document.createElement('div');
+            questionCard.className = 'question-card active';
+            questionCard.innerHTML = `
+                <h3 class="text-xl font-semibold text-gray-800 mb-6">${question.text}</h3>
+                <div class="space-y-3">
+                    ${question.options.map((option, i) => `
+                        <div class="option-card border border-gray-200 rounded-lg p-4 cursor-pointer ${answers[question.id] === option.value ? 'selected' : ''}" 
+                             data-value="${option.value}">
+                            <div class="flex items-center">
+                                <div class="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center mr-3">
+                                    ${answers[question.id] === option.value ? '<i class="fa fa-check text-primary"></i>' : ''}
+                                </div>
+                                <span class="text-gray-700">${option.text}</span>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            // 清空容器并添加新问题
+            questionsContainer.innerHTML = '';
+            questionsContainer.appendChild(questionCard);
+            
+            // 添加选项点击事件
+            const optionCards = questionCard.querySelectorAll('.option-card');
+            optionCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    // 移除其他选项的选中状态
+                    optionCards.forEach(c => {
+                        c.classList.remove('selected');
+                        c.querySelector('.fa-check')?.remove();
+                    });
+                    
+                    // 添加当前选项的选中状态
+                    card.classList.add('selected');
+                    const checkIcon = document.createElement('i');
+                    checkIcon.className = 'fa fa-check text-primary';
+                    card.querySelector('.rounded-full').appendChild(checkIcon);
+                    
+                    // 保存答案
+                    answers[question.id] = parseInt(card.dataset.value);
+                });
+            });
+            
+            // 更新导航按钮状态
+            prevQuestionBtn.classList.toggle('hidden', index === 0);
+            nextQuestionBtn.classList.toggle('hidden', index === questions.length - 1);
+            submitTestBtn.classList.toggle('hidden', index !== questions.length - 1);
+        }
+
+        // 开始测试
+        startTestBtn.addEventListener('click', () => {
+            showPrivacyModal();
+            
+            const hasAcceptedPrivacy = localStorage.getItem('hasAcceptedPrivacy');
+            if (hasAcceptedPrivacy) {
+                testIntro.classList.add('hidden');
+                testQuestions.classList.remove('hidden');
+                loadQuestion(0);
+                
+                // 滚动到测试区域
+                window.scrollTo({
+                    top: testQuestions.offsetTop - 100,
+                    behavior: 'smooth'
+                });
+            } else {
+                privacyModal.classList.remove('hidden');
+                acceptPrivacyBtn.addEventListener('click', () => {
+                    testIntro.classList.add('hidden');
+                    testQuestions.classList.remove('hidden');
+                    loadQuestion(0);
+                    
+                    // 滚动到测试区域
+                    window.scrollTo({
+                        top: testQuestions.offsetTop - 100,
+                        behavior: 'smooth'
+                    });
+                });
+            }
+        });
+
+        // 上一题
+        prevQuestionBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                loadQuestion(currentQuestion);
+            }
+        });
+
+        // 下一题
+        nextQuestionBtn.addEventListener('click', () => {
+            // 检查是否选择了选项
+            if (!answers[questions[currentQuestion].id]) {
+                alert('请选择一个选项');
+                return;
+            }
+            
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                loadQuestion(currentQuestion);
+            }
+        });
+
+        // 计算结果
+        function calculateResults() {
+            // 计算总分
+            let totalScore = 0;
+            const dimensionScores = {
+                cognition: 0,
+                emotion: 0,
+                behavior: 0,
+                social: 0
+            };
+            
+            const dimensionCounts = {
+                cognition: 0,
+                emotion: 0,
+                behavior: 0,
+                social: 0
+            };
+            
+            // 计算各维度得分
+            for (const question of questions) {
+                if (answers[question.id]) {
+                    totalScore += answers[question.id];
+                    dimensionScores[question.dimension] += answers[question.id];
+                    dimensionCounts[question.dimension]++;
+                }
+            }
+            
+            // 计算各维度平均分
+            const dimensionAverages = {};
+            for (const dimension in dimensionScores) {
+                dimensionAverages[dimension] = Math.round((dimensionScores[dimension] / dimensionCounts[dimension]) * 2);
+            }
+            
+            return {
+                totalScore,
+                dimensionScores: dimensionAverages
+            };
+        }
+
+        // 显示结果
+        function showResults() {
+            const results = calculateResults();
+            
+            // 隐藏测试问题，显示结果
+            testQuestions.classList.add('hidden');
+            testResult.classList.remove('hidden');
+            
+            // 滚动到结果区域
+            window.scrollTo({
+                top: testResult.offsetTop - 100,
+                behavior: 'smooth'
+            });
+            
+            // 显示总分
+            document.getElementById('result-score').textContent = results.totalScore;
+            
+            // 显示结果等级和描述
+            let interpretation = null;
+            for (const item of resultInterpretations) {
+                if (results.totalScore >= item.range[0] && results.totalScore <= item.range[1]) {
+                    interpretation = item;
+                    break;
+                }
+            }
+            
+            if (interpretation) {
+                document.getElementById('result-level').textContent = interpretation.level;
+                document.getElementById('result-description').textContent = interpretation.description;
+                
+                // 显示建议
+                const suggestionsEl = document.getElementById('suggestions');
+                suggestionsEl.innerHTML = '';
+                interpretation.suggestions.forEach((suggestion, index) => {
+                    const suggestionEl = document.createElement('div');
+                    suggestionEl.className = 'flex items-start mb-4';
+                    suggestionEl.innerHTML = `
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center mr-3 flex-shrink-0 mt-1">
+                            <span class="text-white font-medium">${index + 1}</span>
+                        </div>
+                        <p class="text-gray-600">${suggestion}</p>
+                    `;
+                    suggestionsEl.appendChild(suggestionEl);
+                });
+            }
+            
+            // 显示各维度得分和描述
+            const dimensions = ['cognition', 'emotion', 'behavior', 'social'];
+            
+            dimensions.forEach(dimension => {
+                const score = results.dimensionScores[dimension];
+                const percentage = (score / 10) * 100;
+                
+                // 更新得分和进度条
+                document.getElementById(`${dimension}-score`).textContent = `${score}/10`;
+                document.getElementById(`${dimension}-bar`).style.width = `${percentage}%`;
+                
+                // 更新描述
+                const descriptionIndex = Math.floor((score - 1) / 2); // 将1-10分映射到0-4个描述
+                document.getElementById(`${dimension}-description`).textContent = dimensionInterpretations[dimension][descriptionIndex];
+            });
+            
+            // 创建结果图表
+            const ctx = document.getElementById('result-chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [results.totalScore, 125 - results.totalScore],
+                        backgroundColor: [
+                            '#6366f1',
+                            '#e5e7eb'
+                        ],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    cutout: '80%',
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    }
+                }
+            });
+            
+            // 保存结果到本地存储
+            const resultData = {
+                score: results.totalScore,
+                dimensions: results.dimensionScores,
+                interpretation: interpretation,
+                date: new Date().toISOString()
+            };
+            
+            const history = JSON.parse(localStorage.getItem('testHistory') || '[]');
+            history.push(resultData);
+            localStorage.setItem('testHistory', JSON.stringify(history));
+        }
+
+        // 提交测试
+        submitTestBtn.addEventListener('click', () => {
+            // 检查是否选择了选项
+            if (!answers[questions[currentQuestion].id]) {
+                alert('请选择一个选项');
+                return;
+            }
+            
+            showResults();
+        });
+
+        // 保存结果
+        saveResultBtn.addEventListener('click', () => {
+            const history = JSON.parse(localStorage.getItem('testHistory') || '[]');
+            const latestResult = history[history.length - 1];
+            
+            if (latestResult) {
+                const resultText = `
+性压抑程度测试结果
+测试日期: ${new Date(latestResult.date).toLocaleDateString()}
+总分: ${latestResult.score}/125
+压抑程度: ${latestResult.interpretation.level}
+
+结果描述:
+${latestResult.interpretation.description}
+
+各维度得分:
+性认知: ${latestResult.dimensions.cognition}/10
+性情绪: ${latestResult.dimensions.emotion}/10
+性行为: ${latestResult.dimensions.behavior}/10
+性社交: ${latestResult.dimensions.social}/10
+
+建议:
+${latestResult.interpretation.suggestions.join('\n')}
+                `;
+                
+                // 创建下载链接
+                const blob = new Blob([resultText], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `性压抑测试结果_${new Date().toLocaleDateString()}.txt`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+            }
+        });
+
+        // 分享结果
+        shareResultBtn.addEventListener('click', () => {
+            const history = JSON.parse(localStorage.getItem('testHistory') || '[]');
+            const latestResult = history[history.length - 1];
+            
+            if (latestResult) {
+                const shareText = `
+我完成了性压抑程度测试，结果为${latestResult.interpretation.level}。
+总分: ${latestResult.score}/125
+各维度得分:
+性认知: ${latestResult.dimensions.cognition}/10
+性情绪: ${latestResult.dimensions.emotion}/10
+性行为: ${latestResult.dimensions.behavior}/10
+性社交: ${latestResult.dimensions.social}/10
+
+测试链接: ${window.location.href}
+                `;
+                
+                // 检查浏览器是否支持分享API
+                if (navigator.share) {
+                    navigator.share({
+                        title: '性压抑程度测试结果',
+                        text: shareText,
+                        url: window.location.href
+                    }).catch(err => {
+                        console.error('分享失败:', err);
+                        alert('分享功能不可用，请手动复制分享内容。');
+                    });
+                } else {
+                    // 创建一个临时文本区域用于复制
+                    const textarea = document.createElement('textarea');
+                    textarea.value = shareText;
+                    document.body.appendChild(textarea);
+                    textarea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textarea);
+                    alert('结果已复制到剪贴板，请手动粘贴分享。');
+                }
+            }
+        });
+
+        // 重新测试
+        restartTestBtn.addEventListener('click', () => {
+            // 重置测试状态
+            currentQuestion = 0;
+            Object.keys(answers).forEach(key => delete answers[key]);
+            
+            // 隐藏结果，显示测试问题
+            testResult.classList.add('hidden');
+            testQuestions.classList.remove('hidden');
+            
+            // 加载第一个问题
+            loadQuestion(0);
+            
+            // 滚动到测试区域
+            window.scrollTo({
+                top: testQuestions.offsetTop - 100,
+                behavior: 'smooth'
+            });
+        });
+
+        // 页面加载完成后显示隐私政策弹窗
+        window.addEventListener('load', showPrivacyModal);
+    </script>
+</body>
+</html>
